@@ -83,17 +83,39 @@ class MoreInfor extends StatelessWidget {
 List moreInfor = ['EXTRA', 'About', 'Privacy policy'];
 
 List measureUnit = [
-  ['Temperature unit', '°C'],
-  ['Wind speed unit', 'km/h'],
-  ['Atmospheric pressure unit', 'mbar']
+  [
+    'Temperature unit',
+    ['°C', '°K']
+  ],
+  [
+    'Wind speed unit',
+    ['km/h']
+  ],
+  [
+    'Atmospheric pressure unit',
+    ['mbar']
+  ]
 ];
 
-class MeasuredUnit extends StatelessWidget {
+class MeasuredUnit extends StatefulWidget {
   const MeasuredUnit({Key? key, required this.title, required this.unit})
       : super(key: key);
 
   final String title;
-  final String unit;
+  final List<String> unit;
+
+  @override
+  State<MeasuredUnit> createState() => _MeasuredUnitState();
+}
+
+class _MeasuredUnitState extends State<MeasuredUnit> {
+  String dropdownValue = '';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    dropdownValue = widget.unit[0];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,18 +124,35 @@ class MeasuredUnit extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            title,
+            widget.title,
             style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w400, color: primaryColor),
           ),
         ),
-        Text(
-          unit,
-          style: TextStyle(
-            fontSize: 14,
-            color: Color(0xffe0e0e0),
-            fontWeight: FontWeight.w400,
-          ),
+        DropdownButton<String>(
+          value: dropdownValue,
+          // icon: Icon(
+          //   Icons.arrow_downward,
+          //   size: 0,
+          // ),
+          items: widget.unit.map((e) {
+            return DropdownMenuItem<String>(
+              value: e,
+              child: Text(
+                e,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xffE0E0E0),
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              dropdownValue = value!;
+            });
+          },
         )
       ],
     );
