@@ -30,12 +30,12 @@ class CurrentWeather extends StatelessWidget {
     return Column(
       children: [
         islarge
-            ? CurrentForcastCol(
+            ? CurrentForcastRow(
                 temper: temper,
                 imageUrl: 'http://openweathermap.org/img/wn/$imageUrl@2x.png',
                 title: desTitle,
               )
-            : CurrentForcastRow(
+            : CurrentForcastCol(
                 temper: temper,
                 imageUrl: 'http://openweathermap.org/img/wn/$imageUrl@2x.png',
                 title: desTitle,

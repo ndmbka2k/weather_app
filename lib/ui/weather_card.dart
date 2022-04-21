@@ -70,7 +70,7 @@ class WeatherCard extends StatelessWidget {
             height: 4,
           ),
           Text(
-            '${weather.pop}% rain',
+            '${weather.pop.toStringAsFixed(2)}% rain',
             style: TextStyle(
               color: primaryColor,
               fontSize: 12,

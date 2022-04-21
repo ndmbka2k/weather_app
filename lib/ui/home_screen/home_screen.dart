@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather_app/bloc/weather_data/weather_cubit.dart';
+import 'package:weather_app/bloc/weather_data/weather_state.dart';
+import 'package:weather_app/models/load_status.dart';
 import 'package:weather_app/models/weather_data.dart';
+import 'package:weather_app/networks/api_client.dart';
+import 'package:weather_app/repository/weather_repo.dart';
 
 import 'components/current_weather.dart';
 import 'components/daily_weather.dart';
@@ -18,48 +22,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool islarge = true;
+  bool isLoading = false;
+  late WeatherCubit _cubit;
+
   @override
   void initState() {
+    _cubit = BlocProvider.of<WeatherCubit>(context);
     super.initState();
-    getCurrentWether();
-  }
-
-  bool isLoading = true;
-
-  late Current currentWeather;
-  List hourlyWeather = [];
-  List dailyWeather = [];
-  String cityName = '';
-
-  bool islarge = true;
-
-  Future<void> getCurrentWether() async {
-    var client = http.Client();
-    try {
-      var responseName = await client.get(Uri.parse(
-          'https://api.openweathermap.org/data/2.5/weather?lat=20.997452&lon=105.8000156&appid=bc293085140fb725cafc937ad796a591&units=metric'));
-      var response = await client.get(Uri.parse(
-          'https://api.openweathermap.org/data/2.5/onecall?lat=20.997452&lon=105.8000156&exclude=minutely,alerts&appid=bc293085140fb725cafc937ad796a591&units=metric'));
-      Map<dynamic, dynamic> decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-
-      Map<dynamic, dynamic> decodedResponseName =
-          jsonDecode(utf8.decode(responseName.bodyBytes)) as Map;
-
-      WeatherData weatherData =
-          WeatherData.fromJson(decodedResponse as Map<String, dynamic>);
-
-      setState(() {
-        var temp = decodedResponseName['name'].toString();
-        cityName = temp;
-        currentWeather = weatherData.current;
-        hourlyWeather = weatherData.hourly;
-        dailyWeather = weatherData.daily;
-        isLoading = false;
-      });
-    } finally {
-      client.close();
-    }
+    _cubit.init();
   }
 
   @override
@@ -69,75 +40,100 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              height: islarge ? 565 : 353,
-              width: 358,
-              margin: const EdgeInsets.only(
-                  top: 45, bottom: 16, left: 16, right: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xff62B8F6), Color(0xff2C79C1)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  HomeAppBar(name: cityName),
-                  isLoading
-                      ? Container()
-                      : CurrentWeather(
-                          islarge: islarge,
-                          imageUrl: currentWeather.weather[0].icon.toString(),
-                          desTitle: currentWeather.weather[0].main,
-                          temper: (currentWeather.temp).round(),
-                          windSpeed: currentWeather.windSpeed,
-                          pressure: currentWeather.pressure,
-                          humidity: currentWeather.humidity,
-                          pop: currentWeather.pop,
-                        ),
-                ],
-              ),
-            ),
-            HourlyForcast(isLoading: isLoading, hourlyWeather: hourlyWeather),
-            islarge
-                ? InkWell(
-                    onTap: () {
-                      setState(() {
-                        islarge = false;
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(top: 16),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Forcats for 7 Days',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff2C79C1),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Image.asset(
-                            'assets/images/arrow_down.png',
-                            height: 24,
-                            width: 24,
-                            color: Color(0xff2C79C1),
-                          )
-                        ],
-                      ),
+            BlocConsumer<WeatherCubit, WeatherState>(
+              bloc: BlocProvider.of<WeatherCubit>(context),
+              listenWhen: (prev, state) => prev.loadStatus != state.loadStatus,
+              listener: (context, state) {},
+              buildWhen: (prev, state) => prev != state,
+              builder: (context, state) {
+                return Container(
+                  height: state.isLarge ? 353 : 565,
+                  width: 358,
+                  margin: const EdgeInsets.only(
+                      top: 45, bottom: 16, left: 16, right: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xff62B8F6), Color(0xff2C79C1)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
-                  )
-                : DailyWeather(isLoading: isLoading, dailyWeather: dailyWeather)
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      HomeAppBar(name: 'HaNoi'),
+                      state.loadStatus == LoadStatus.LOADING
+                          ? Container()
+                          : CurrentWeather(
+                              islarge: state.isLarge,
+                              imageUrl:
+                                  // state.weatherData.weather[0].icon.toString(),
+                                  state.weatherData!.current.weather[0].icon
+                                      .toString(),
+                              desTitle:
+                                  state.weatherData!.current.weather[0].main,
+                              temper: (state.weatherData!.current.temp).round(),
+                              windSpeed: state.weatherData!.current.windSpeed,
+                              pressure: state.weatherData!.current.pressure,
+                              humidity: state.weatherData!.current.humidity,
+                              pop: state.weatherData!.current.pop,
+                            ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            BlocBuilder<WeatherCubit, WeatherState>(
+                bloc: BlocProvider.of<WeatherCubit>(context),
+                buildWhen: (prev, state) =>
+                    prev.weatherData != state.weatherData,
+                builder: (context, state) {
+                  return HourlyForcast(
+                      isLoading: state.loadStatus == LoadStatus.LOADING,
+                      hourlyWeather: state.weatherData?.hourly);
+                }),
+            BlocBuilder<WeatherCubit, WeatherState>(
+              buildWhen: ((previous, current) => previous != current),
+              builder: (context, state) {
+                return state.isLarge
+                    ? DailyWeather(
+                        isLoading: state.loadStatus == LoadStatus.LOADING,
+                        dailyWeather: state.weatherData?.daily)
+                    : InkWell(
+                        onTap: () {
+                          _cubit.showMore();
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(top: 16),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Forcats for 7 Days',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff2C79C1),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Image.asset(
+                                'assets/images/arrow_down.png',
+                                height: 24,
+                                width: 24,
+                                color: Color(0xff2C79C1),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+              },
+            )
           ],
         ),
       ),

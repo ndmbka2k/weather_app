@@ -37,6 +37,8 @@ dependencies:
   http: ^0.13.4
   intl: ^0.17.0
   date_format: ^2.0.6
+  flutter_bloc: ^7.1.0
+  equatable: ^2.0.3
 
 
 dev_dependencies:

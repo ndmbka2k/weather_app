@@ -10,7 +10,7 @@ class DailyWeather extends StatelessWidget {
       {Key? key, required this.dailyWeather, required this.isLoading})
       : super(key: key);
 
-  final List dailyWeather;
+  final List? dailyWeather;
   final bool isLoading;
 
   @override
@@ -41,7 +41,7 @@ class DailyWeather extends StatelessWidget {
                   shrinkWrap: true,
                   itemCount: 7,
                   itemBuilder: (context, index) {
-                    Daily temp = dailyWeather[index];
+                    Daily temp = dailyWeather![index];
                     return Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 24,
