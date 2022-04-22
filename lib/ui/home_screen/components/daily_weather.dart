@@ -78,7 +78,7 @@ class DailyWeather extends StatelessWidget {
                                       width: 8,
                                     ),
                                     Text(
-                                      '${temp.pop}% rain',
+                                      '${temp.pop.toStringAsFixed(2)}% rain',
                                       style: TextStyle(
                                           color: AppColor.primaryColor,
                                           fontSize: 12),

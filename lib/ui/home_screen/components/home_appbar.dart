@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather_app/bloc/unit/unit_cubit.dart';
 import 'package:weather_app/constants/colors/app_colors.dart';
+import 'package:weather_app/repository/unit_repo.dart';
+import 'package:weather_app/ui/settings_screen/settings_screen.dart';
 
 import '../../swiper.dart';
 
@@ -51,7 +55,17 @@ class HomeAppBar extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
-            Navigator.pushNamed(context, 'settings_screen');
+            final repository = RepositoryProvider.of<UnitRepo>(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return BlocProvider(
+                    create: (context) => UnitCubit(repository),
+                    child: SettingsScreen(),
+                  );
+                },
+              ),
+            );
           },
           child: Image.asset(
             'assets/icons/menu.png',

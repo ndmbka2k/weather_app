@@ -15,7 +15,9 @@ class WeatherCubit extends Cubit<WeatherState> {
         emit(state.copyWith(
             loadStatus: LoadStatus.SUCCESS, weatherData: result));
       }
-    } catch (e) {}
+    } catch (e) {
+      emit(state.copyWith(loadStatus: LoadStatus.FAIL));
+    }
   }
 
   void showMore() {

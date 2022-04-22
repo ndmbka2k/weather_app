@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather_app/repository/unit_repo.dart';
 import 'package:weather_app/ui/components/appbar_custom.dart';
 import 'package:weather_app/ui/components/background_body.dart';
 import 'package:weather_app/ui/home_screen/home_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+import '../../bloc/unit/unit_cubit.dart';
+
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late UnitCubit _cubit;
+  late List cubitTitle;
+  late List cubitUnit;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    _cubit = BlocProvider.of<UnitCubit>(context);
+    super.initState();
+    _cubit.init();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,18 +45,74 @@ class SettingsScreen extends StatelessWidget {
                     color: primaryColor),
               ),
             ),
-            ListView.separated(
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return MeasuredUnit(
-                    title: measureUnit[index][0], unit: measureUnit[index][1]);
-              },
-              separatorBuilder: (context, index) {
-                return SizedBox(
-                  height: 14,
+            BlocConsumer<UnitCubit, UnitState>(
+              listener: (context, state) {},
+              buildWhen: (previous, current) => previous != current,
+              builder: (context, state) {
+                return ListView.separated(
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    String dropdownvalue = '';
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            state.titleList![index],
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: primaryColor),
+                          ),
+                        ),
+                        DropdownButton<String>(
+                          value: state.unitList![index][0],
+                          // icon: Icon(
+                          //   Icons.arrow_downward,
+                          //   size: 0,
+                          // ),
+                          items: (state.unitList![index])
+                              .map<DropdownMenuItem<String>>((e) {
+                            return DropdownMenuItem<String>(
+                              value: e,
+                              child: Text(
+                                e,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xffE0E0E0),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (index == 0) {
+                              _cubit.changeTemperUnit(value!);
+                              dropdownvalue = state.temperUnit;
+                              print('change');
+                            }
+                            if (index == 1) {
+                              _cubit.changeSpeedUnit(value!);
+                              dropdownvalue = state.speedUnit;
+                              print('change1');
+                            }
+                            if (index == 2) {
+                              _cubit.changePressureUnit(value!);
+                              dropdownvalue = state.temperUnit;
+                            }
+                          },
+                        )
+                      ],
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return SizedBox(
+                      height: 14,
+                    );
+                  },
+                  itemCount: measureUnit.length,
                 );
               },
-              itemCount: measureUnit.length,
             ),
             Divider(
               height: 64,

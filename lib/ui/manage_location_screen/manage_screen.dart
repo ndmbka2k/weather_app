@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather_app/bloc/weather_data/weather_cubit.dart';
 
 import '../components/appbar_custom.dart';
 import '../components/background_body.dart';
 import '../location_weather.dart';
 
-class ManageScreen extends StatelessWidget {
+class ManageScreen extends StatefulWidget {
   const ManageScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ManageScreen> createState() => _ManageScreenState();
+}
+
+class _ManageScreenState extends State<ManageScreen> {
+  late WeatherCubit _cubit;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    _cubit = BlocProvider.of<WeatherCubit>(context);
+  }
 
   @override
   Widget build(BuildContext context) {

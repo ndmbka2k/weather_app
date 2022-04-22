@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import '../models/weather_data.dart';
 
 class ApiClient {
+  var client = http.Client();
   Future<WeatherData> getDetailWeather() async {
-    var client = http.Client();
     try {
       var response = await client.get(Uri.parse(
           'https://api.openweathermap.org/data/2.5/onecall?lat=20.997452&lon=105.8000156&exclude=minutely,alerts&appid=bc293085140fb725cafc937ad796a591&units=metric'));

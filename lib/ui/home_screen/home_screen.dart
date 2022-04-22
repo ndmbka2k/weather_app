@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             BlocConsumer<WeatherCubit, WeatherState>(
               bloc: BlocProvider.of<WeatherCubit>(context),
-              listenWhen: (prev, state) => prev.loadStatus != state.loadStatus,
+              listenWhen: (prev, state) => prev != state,
               listener: (context, state) {},
               buildWhen: (prev, state) => prev != state,
               builder: (context, state) {
@@ -96,7 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       hourlyWeather: state.weatherData?.hourly);
                 }),
             BlocBuilder<WeatherCubit, WeatherState>(
-              buildWhen: ((previous, current) => previous != current),
+              buildWhen: ((previous, current) =>
+                  previous.isLarge != current.isLarge),
               builder: (context, state) {
                 return state.isLarge
                     ? DailyWeather(
@@ -104,7 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         dailyWeather: state.weatherData?.daily)
                     : InkWell(
                         onTap: () {
+                          print(state.isLarge);
                           _cubit.showMore();
+                          print(state.isLarge);
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 16),
