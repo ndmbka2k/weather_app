@@ -66,7 +66,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         DropdownButton<String>(
-                          value: state.unitList![index][0],
+                          value: index == 0
+                              ? state.temperUnit
+                              : index == 1
+                                  ? state.speedUnit
+                                  : state.pressureUnit,
                           // icon: Icon(
                           //   Icons.arrow_downward,
                           //   size: 0,
@@ -89,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             if (index == 0) {
                               _cubit.changeTemperUnit(value!);
                               dropdownvalue = state.temperUnit;
-                              print('change');
+                              print(dropdownvalue);
                             }
                             if (index == 1) {
                               _cubit.changeSpeedUnit(value!);
